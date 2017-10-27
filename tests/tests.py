@@ -104,9 +104,9 @@ class BasicTestSuite(unittest.TestCase):
         """ how much users pay more than 100 """
         result = datatoaster.DataSet(self.test_set_1) \
             .set_x(lambda i: i["OS"]) \
-            .set_y(lambda d: [i["PaidAmount"] for i in d]) \
+            .set_y(lambda d: [min([i["PaidAmount"] for i in d]), max([i["PaidAmount"] for i in d])]) \
             .get_result()
-        desired_result = {"Android": 20, "iOS": 210}
+        desired_result = {'Android': [0, 20], 'iOS': [0, 172]}
 
         self.assertDictEqual(result, desired_result)
 
