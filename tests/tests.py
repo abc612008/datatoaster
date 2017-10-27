@@ -101,7 +101,7 @@ class BasicTestSuite(unittest.TestCase):
         self.assertEqual(result, desired_result)
 
     def test_case_y_value_multiple_values(self):
-        """ how much users pay more than 100 """
+        """ the maximum and minimum paid amount per OS """
         result = datatoaster.DataSet(self.test_set_1) \
             .set_x(lambda i: i["OS"]) \
             .set_y(lambda d: [min([i["PaidAmount"] for i in d]), max([i["PaidAmount"] for i in d])]) \
