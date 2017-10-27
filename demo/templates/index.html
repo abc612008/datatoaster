@@ -3,14 +3,116 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Proudly presented by ECharts</title>
+    <title>Datatoaster Demo Site</title>
 	{% for jsfile_name in script_list %}
     <script src="{{host}}/{{jsfile_name}}.js"></script>
     {% endfor %}
+    <style>
+    h1 {margin: 5%;text-align:center;}
+    h2 {margin: 2%;font-weight:bold;}
+    body{margin: 5% 20%; font-family:"Consolas","Hack","Microsoft YaHei"}
+    .charts div{margin:0 auto;}
+    #dataset_click{text-align:center;}
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <link href="https://cdn.bootcss.com/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/python.min.js"></script>
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/languages/json.min.js"></script>
+    <script>  
+        hljs.initHighlightingOnLoad();
+        $(document).ready(function(){  
+            $("#dataset_click").click(function(){  $("#dataset").toggle();});  
+        });  
+    </script> 
 </head>
 
 <body>
-  {{myechart|safe}}
+
+<div class="charts">
+    <h1>Datatoaster Demo Site</h1>
+    <p id="dataset_click">&gt;&gt; Click here to show dataset (randomly generated). &lt;&lt;</p>
+    <pre id="dataset" style="display:none;"><code class="lang-json">{{dataset}}</code></pre>
+    
+    <h2>Example 1: How many users use each OS?</h2>
+    <pre>
+    In:
+    <code class="lang-python">
+    datatoaster.DataSet(demo_data) \
+        .set_x(lambda item: item["OS"]) \
+        .set_y(datatoaster.DataSet.NumberOfAppearance) \
+        .get_result()
+    </code>
+    Out:
+    <code class="lang-json">    {{bar_chart_1_raw}}</code>
+    Chart:<br>
+{{bar_chart_1|safe}}
+    </pre>
+
+    <h2>Example 2: How many percent of users use each OS?</h2>
+    <pre>
+    In:
+    <code class="lang-python">
+    pie_chart_1_raw = datatoaster.DataSet(demo_data) \
+        .set_x(lambda i: i["OS"]) \
+        .set_y(datatoaster.DataSet.Percentage) \
+        .get_result()
+    </code>
+    Out:
+    <code class="lang-json">    {{pie_chart_1_raw}}</code>
+    Chart:<br>
+{{pie_chart_1|safe}}
+    </pre>
+    
+    <h2>Example 3: How many percent of users paid money? (per OS)</h2>
+    <pre>
+    In:
+    <code class="lang-python">
+    bar_chart_2_raw = datatoaster.DataSet(demo_data) \
+        .set_x(lambda i: i["OS"]) \
+        .set_y(datatoaster.DataSet.PercentageWithinGroup) \
+        .add_constraint(lambda i: i["PaidAmount"] != 0) \
+        .get_result()
+    </code>
+    Out:
+    <code class="lang-json">    {{bar_chart_2_raw}}</code>
+    Chart:<br>
+{{bar_chart_2|safe}}
+    </pre>
+    
+    <h2>Example 4: The maximum and average payment per OS</h2>
+    <pre>
+    In:
+    <code class="lang-python">
+    bar_chart_3_raw = datatoaster.DataSet(demo_data) \
+        .set_x(lambda i: i["OS"]) \
+        .set_y(lambda d: [min([i["PaidAmount"] for i in d]), sum([i["PaidAmount"] for i in d])/len(d)]) \
+        .get_result()
+    </code>
+    Out:
+    <code class="lang-json">    {{bar_chart_3_raw}}</code>
+    Chart:<br>
+{{bar_chart_3|safe}}
+    </pre>
+    
+    <h2>Example 5: How many users paid more than 100?</h2>
+    <pre>
+    In:
+    <code class="lang-python">
+    pie_chart_2_raw = datatoaster.DataSet(demo_data) \
+            .set_x(datatoaster.DataSet.Single) \
+            .set_y(datatoaster.DataSet.Percentage) \
+            .add_constraint(lambda i: i["PaidAmount"] > 100)\
+            .set_single(True)\
+            .get_result()
+    </code>
+    Out:
+    <code class="lang-json">    {{pie_chart_2_raw}}</code>
+    Chart:<br>
+{{pie_chart_2|safe}}
+    </pre>
+</div>
+
 </body>
 
 </html>
