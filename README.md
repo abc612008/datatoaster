@@ -41,13 +41,18 @@ For more examples, you can run `python3 ./demo/server.py`.
 ## Documentation
 
 DataSet.set_x(DataSet.Single / function): Set X value
+
     DataSet.Single: equivalent to (lambda i:"")
+    
     function: data_item -> desired_x_value
     
 DataSet.set_y(DataSet.NumberOfAppearance/DataSet.Percentage/DataSet.PercentageWithinGroup/function): Set Y value
     NumberOfAppearance: Y value will be the number of appearance of X.
+    
     Percentage: Y value will be the percentage of appearance of X over the whole data set.
+    
     PercentageWithinGroup: Y value will be the percentage of appearance of X over the group.
+    
     function: [data_item] -> y_value / [y_values] Y value will be what your function returns.
 
 DataSet.get_result(): Get the final result
@@ -56,6 +61,7 @@ DataSet.get_result(): Get the final result
 
 DataSet.add_constraint(function, is_single): Add a constraint
     function: data_item -> boolean (indicates whether the value should be used)
+    
     is_single: indicates if the constraint applies to "whole data set"(Only makes difference when .SetY(Percentage)), defaults to False.
 
 It may seem confusing. You can refer to [unit tests](https://github.com/abc612008/datatoaster/blob/master/tests/tests.py) or [demo](https://github.com/abc612008/datatoaster/blob/master/demo/server.py) for more examples.

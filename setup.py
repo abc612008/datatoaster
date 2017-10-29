@@ -12,5 +12,5 @@ setup(
     author_email='harryyunull@gmail.com',
     url='https://github.com/abc612008/datatoaster',
     license="MIT",
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs', 'demo'))
 )
