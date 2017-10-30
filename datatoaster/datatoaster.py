@@ -1,9 +1,20 @@
+import collections
+
 class DataSet:
     """ constants """
     NumberOfAppearance = 0
     Percentage = 1
     PercentageWithinGroup = 2
     Single = lambda _: ""
+
+    def NumberOfAppearanceKey(key_function):
+        def yfunc(li):
+            os_list = {}
+            for i in li:
+                key = key_function(i)
+                os_list[key] = os_list.get(key, 0) + 1
+            return os_list
+        return yfunc
 
     def __init__(self, raw_data):
         self.raw_data = raw_data
@@ -15,6 +26,7 @@ class DataSet:
         self.constraints = []
         self.pre_constraints = []
         self.single = False
+        self.order_key = None
 
     def set_x(self, func):
         if not callable(func):
@@ -71,7 +83,23 @@ class DataSet:
         self.single = param
         return self
 
+    def ordered_by(self, order_key):
+        self.order_key = order_key
+        return self
+
     def get_result(self):
+        def process_result(result):
+            if self.single:
+                if len(result) != 1:
+                    raise ValueError("Single mode set while there are more than one result. "
+                                     "Results: " + str(result))
+                return next(iter(result.values()))
+            else:
+                if self.order_key is not None:
+                    return collections.OrderedDict(sorted(result.items(), key=self.order_key))
+                else:
+                    return result
+
         if self.x_function is None:  # x_function should not be None
             raise ValueError("set_x not called when calling get_result")
 
@@ -117,13 +145,7 @@ class DataSet:
                 for key in appearance:
                     appearance[key] /= all_appearance[key]
 
-            if self.single:
-                if len(appearance) != 1:
-                    raise ValueError("Single mode set while there are more than one result. "
-                                     "Results: " + str(appearance))
-                return next(iter(appearance.values()))
-            else:
-                return appearance
+            return process_result(appearance)
 
         # handle y_function
         if self.y_function:
@@ -138,13 +160,7 @@ class DataSet:
             for key, value in values.items():
                 values[key] = self.y_function(value)
 
-            if self.single:
-                return next(iter(values.values()))
-            else:
-                return values
+            return process_result(values)
 
         # neither any options nor y_function is set
         raise ValueError("set_y not called when calling get_result")
-
-    def get_series(self):
-        return []

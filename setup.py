@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
+with open('README.md', encoding = "utf-8") as f:
     readme = f.read()
 
 setup(
@@ -12,5 +12,5 @@ setup(
     author_email='harryyunull@gmail.com',
     url='https://github.com/abc612008/datatoaster',
     license="MIT",
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs', 'demo'))
 )
