@@ -100,6 +100,8 @@ class DataSet:
         return self
 
     def ordered_by(self, order_key):
+        if not callable(order_key):
+            raise ValueError("Expect the argument to be a function.")
         self.order_key = order_key
         return self
 
@@ -147,13 +149,11 @@ class DataSet:
                 all_appearance[key] = all_appearance.get(key, 0) + 1
 
         # handle number_of_appearance, percentage and percentage_within_group
-        if self.number_of_appearance or self.percentage or self.percentage_within_group:
+        if (self.number_of_appearance or self.percentage or self.percentage_within_group) \
+                and self.y_function is DataSet.XValue:
             appearance = {}
             for item in filtered_data:
-                if self.y_function is DataSet.XValue:
-                    key = self.x_function(item)
-                else:
-                    key = self.y_function(item)
+                key = self.x_function(item)
                 appearance[key] = appearance.get(key, 0) + 1
 
             if self.percentage:  # handle percentage (divide each result by the number of data)
@@ -178,6 +178,12 @@ class DataSet:
 
             for key, value in values.items():
                 values[key] = self.y_function(value)
+                if self.percentage:
+                    for k in values[key].keys():
+                        values[key][k] /= number_of_valid_data
+                elif self.percentage_within_group:
+                    for k in values[key].keys():
+                        values[key][k] /= all_appearance[key]
 
             return process_result(values)
 
