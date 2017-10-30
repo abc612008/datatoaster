@@ -1,19 +1,57 @@
 import collections
 
+
 class DataSet:
     """ constants """
-    NumberOfAppearance = 0
-    Percentage = 1
-    PercentageWithinGroup = 2
+
+    class _XValueClass:
+        pass
+
+    XValue = _XValueClass()
     Single = lambda _: ""
 
-    def NumberOfAppearanceKey(key_function):
+    def NumberOfAppearance(self, key_function):
+        self.number_of_appearance = True
+        if key_function is DataSet.XValue:
+            return DataSet.XValue
+
         def yfunc(li):
             os_list = {}
             for i in li:
                 key = key_function(i)
                 os_list[key] = os_list.get(key, 0) + 1
             return os_list
+
+        return yfunc
+
+    def Percentage(self, key_function):
+        self.percentage = True
+
+        if key_function is DataSet.XValue:
+            return DataSet.XValue
+
+        def yfunc(li):
+            os_list = {}
+            for i in li:
+                key = key_function(i)
+                os_list[key] = os_list.get(key, 0) + 1
+            return os_list
+
+        return yfunc
+
+    def PercentageWithinGroup(self, key_function):
+        self.percentage_within_group = True
+
+        if key_function is DataSet.XValue:
+            return DataSet.XValue
+
+        def yfunc(li):
+            os_list = {}
+            for i in li:
+                key = key_function(i)
+                os_list[key] = os_list.get(key, 0) + 1
+            return os_list
+
         return yfunc
 
     def __init__(self, raw_data):
@@ -37,33 +75,11 @@ class DataSet:
         return self
 
     def set_y(self, param):
-        if param == self.NumberOfAppearance:
-            self.number_of_appearance = True
-            self.percentage = False
-            self.percentage_within_group = False
-            self.y_function = None
-            return self
+        if not callable(param) and not ((param is DataSet.XValue and self.number_of_appearance)
+                                        or (param is DataSet.XValue and self.percentage)
+                                        or (param is DataSet.XValue and self.percentage_within_group)):
+            raise ValueError("Expect the argument to be a function.")
 
-        if param == self.Percentage:
-            self.number_of_appearance = False
-            self.percentage = True
-            self.percentage_within_group = False
-            self.y_function = None
-            return self
-
-        if param == self.PercentageWithinGroup:
-            self.number_of_appearance = False
-            self.percentage = False
-            self.percentage_within_group = True
-            self.y_function = None
-            return self
-
-        if not callable(param):
-            raise ValueError("The argument is neither DataSet.NumberOfAppearance, "
-                             "DataSet.Percentage nor a function.")
-
-        self.number_of_appearance = False
-        self.percentage = False
         self.y_function = param
 
         return self
@@ -134,7 +150,10 @@ class DataSet:
         if self.number_of_appearance or self.percentage or self.percentage_within_group:
             appearance = {}
             for item in filtered_data:
-                key = self.x_function(item)
+                if self.y_function is DataSet.XValue:
+                    key = self.x_function(item)
+                else:
+                    key = self.y_function(item)
                 appearance[key] = appearance.get(key, 0) + 1
 
             if self.percentage:  # handle percentage (divide each result by the number of data)
@@ -162,5 +181,4 @@ class DataSet:
 
             return process_result(values)
 
-        # neither any options nor y_function is set
         raise ValueError("set_y not called when calling get_result")
