@@ -17,6 +17,7 @@ class BasicTestSuite(unittest.TestCase):
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).set_x, 0)
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).set_x, "0")
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).set_x, [])
+        self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).set_y, 0)
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).add_constraint, 0)
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1).ordered_by, 0)
 
@@ -25,18 +26,18 @@ class BasicTestSuite(unittest.TestCase):
 
         # get_result without set_y being called
         self.assertRaises(ValueError, datatoaster.DataSet(self.test_set_1)
-                          .set_x(datatoaster.DataSet.Single).get_result)
+                          .set_x(datatoaster.Single).get_result)
 
         # get_result without set_x being called
         data_set_1 = datatoaster.DataSet(self.test_set_1)
         self.assertRaises(ValueError, data_set_1
-                          .set_y(data_set_1.Percentage(datatoaster.DataSet.XValue)).get_result)
+                          .set_y(data_set_1.Percentage(datatoaster.XValue)).get_result)
 
         # single mode set wrongly
         data_set_2 = datatoaster.DataSet(self.test_set_1)
         self.assertRaises(ValueError, data_set_2
                           .set_x(lambda i: i["OS"])
-                          .set_y(data_set_2.Percentage(datatoaster.DataSet.XValue))
+                          .set_y(data_set_2.Percentage(datatoaster.XValue))
                           .set_single(True)
                           .get_result)
 
@@ -45,7 +46,7 @@ class BasicTestSuite(unittest.TestCase):
         data_set = datatoaster.DataSet(self.test_set_1)
         result = data_set \
             .set_x(lambda i: i["OS"]) \
-            .set_y(data_set.NumberOfAppearance(datatoaster.DataSet.XValue)) \
+            .set_y(data_set.NumberOfAppearance(datatoaster.XValue)) \
             .get_result()
         desired_result = {"Android": 3, "iOS": 5}
 
@@ -55,7 +56,7 @@ class BasicTestSuite(unittest.TestCase):
         """ get the user number percentage of each OS """
         data_set = datatoaster.DataSet(self.test_set_1)
         result = data_set.set_x(lambda i: i["OS"]) \
-            .set_y(data_set.Percentage(datatoaster.DataSet.XValue)) \
+            .set_y(data_set.Percentage(datatoaster.XValue)) \
             .get_result()
         desired_result = {"Android": 3 / (3 + 5), "iOS": 5 / (3 + 5)}
 
@@ -65,7 +66,7 @@ class BasicTestSuite(unittest.TestCase):
         """ get the paid user number of each OS """
         data_set = datatoaster.DataSet(self.test_set_1)
         result = data_set.set_x(lambda i: i["OS"]) \
-            .set_y(data_set.NumberOfAppearance(datatoaster.DataSet.XValue)) \
+            .set_y(data_set.NumberOfAppearance(datatoaster.XValue)) \
             .add_constraint(lambda i: i["PaidAmount"] != 0) \
             .get_result()
         desired_result = {"Android": 1, "iOS": 3}
@@ -76,7 +77,7 @@ class BasicTestSuite(unittest.TestCase):
         """ get the paid user percentage of each OS (of all paid users) """
         data_set = datatoaster.DataSet(self.test_set_1)
         result = data_set.set_x(lambda i: i["OS"]) \
-            .set_y(data_set.Percentage(datatoaster.DataSet.XValue)) \
+            .set_y(data_set.Percentage(datatoaster.XValue)) \
             .add_constraint(lambda i: i["PaidAmount"] != 0, True) \
             .get_result()
         desired_result = {"Android": 1 / 4, "iOS": 3 / 4}
@@ -87,7 +88,7 @@ class BasicTestSuite(unittest.TestCase):
         """ get the paid user number percentage of each OS """
         data_set = datatoaster.DataSet(self.test_set_1)
         result = data_set.set_x(lambda i: i["OS"]) \
-            .set_y(data_set.PercentageWithinGroup(datatoaster.DataSet.XValue)) \
+            .set_y(data_set.PercentageWithinGroup(datatoaster.XValue)) \
             .add_constraint(lambda i: i["PaidAmount"] != 0) \
             .get_result()
         desired_result = {"Android": 1 / 3, "iOS": 3 / 5}
@@ -107,8 +108,8 @@ class BasicTestSuite(unittest.TestCase):
     def test_case_percentage_constraint_single(self):
         """ how much users pay more than 100 """
         data_set = datatoaster.DataSet(self.test_set_1)
-        result = data_set.set_x(datatoaster.DataSet.Single) \
-            .set_y(data_set.Percentage(datatoaster.DataSet.XValue)) \
+        result = data_set.set_x(datatoaster.Single) \
+            .set_y(data_set.Percentage(datatoaster.XValue)) \
             .add_constraint(lambda i: i["PaidAmount"] > 100) \
             .set_single(True) \
             .get_result()
@@ -148,12 +149,13 @@ class BasicTestSuite(unittest.TestCase):
 
         self.assertDictEqual(result, desired_result)
 
-    def test_case_percentage_y_value(self):
+    def test_case_percentage_y_value_order(self):
         """ number of actions per type per day """
         data_set = datatoaster.DataSet(self.test_set_2)
         result = data_set \
             .set_x(lambda i: i["date"]) \
             .set_y(data_set.Percentage(lambda i: i["action"])) \
+            .ordered_by(lambda i: i[0]) \
             .get_result()
         desired_result = {'2017-09-29': {'view': 1 / 9}, '2017-10-19': {'add': 1 / 9, 'delete': 3 / 9, 'view': 2 / 9},
                           '2017-10-28': {'add': 1 / 9}, '2017-10-30': {'view': 1 / 9}}

@@ -1,19 +1,15 @@
 import collections
 
+""" constants """
+XValue = lambda _: ""
+Single = lambda _: ""
 
 class DataSet:
-    """ constants """
-
-    class _XValueClass:
-        pass
-
-    XValue = _XValueClass()
-    Single = lambda _: ""
 
     def NumberOfAppearance(self, key_function):
         self.number_of_appearance = True
-        if key_function is DataSet.XValue:
-            return DataSet.XValue
+        if key_function is XValue:
+            self.single_dict = True
 
         def yfunc(li):
             os_list = {}
@@ -26,9 +22,8 @@ class DataSet:
 
     def Percentage(self, key_function):
         self.percentage = True
-
-        if key_function is DataSet.XValue:
-            return DataSet.XValue
+        if key_function is XValue:
+            self.single_dict = True
 
         def yfunc(li):
             os_list = {}
@@ -41,9 +36,8 @@ class DataSet:
 
     def PercentageWithinGroup(self, key_function):
         self.percentage_within_group = True
-
-        if key_function is DataSet.XValue:
-            return DataSet.XValue
+        if key_function is XValue:
+            self.single_dict = True
 
         def yfunc(li):
             os_list = {}
@@ -61,6 +55,7 @@ class DataSet:
         self.number_of_appearance = False
         self.percentage = False
         self.percentage_within_group = False
+        self.single_dict = False
         self.constraints = []
         self.pre_constraints = []
         self.single = False
@@ -75,9 +70,7 @@ class DataSet:
         return self
 
     def set_y(self, param):
-        if not callable(param) and not ((param is DataSet.XValue and self.number_of_appearance)
-                                        or (param is DataSet.XValue and self.percentage)
-                                        or (param is DataSet.XValue and self.percentage_within_group)):
+        if not callable(param):
             raise ValueError("Expect the argument to be a function.")
 
         self.y_function = param
@@ -107,6 +100,9 @@ class DataSet:
 
     def get_result(self):
         def process_result(result):
+            if self.single_dict:
+                for key in result.keys():
+                    result[key] = result[key][""]
             if self.single:
                 if len(result) != 1:
                     raise ValueError("Single mode set while there are more than one result. "
@@ -147,24 +143,6 @@ class DataSet:
             if self.percentage_within_group:  # for percentage within group
                 key = self.x_function(item)
                 all_appearance[key] = all_appearance.get(key, 0) + 1
-
-        # handle number_of_appearance, percentage and percentage_within_group
-        if (self.number_of_appearance or self.percentage or self.percentage_within_group) \
-                and self.y_function is DataSet.XValue:
-            appearance = {}
-            for item in filtered_data:
-                key = self.x_function(item)
-                appearance[key] = appearance.get(key, 0) + 1
-
-            if self.percentage:  # handle percentage (divide each result by the number of data)
-                for key in appearance:
-                    appearance[key] /= number_of_valid_data
-
-            if self.percentage_within_group:  # handle percentage within group
-                for key in appearance:
-                    appearance[key] /= all_appearance[key]
-
-            return process_result(appearance)
 
         # handle y_function
         if self.y_function:
